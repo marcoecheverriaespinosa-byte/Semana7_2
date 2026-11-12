@@ -1,0 +1,148 @@
+import Arregos.Tienda.Modelo.AppStore;
+import Arregos.Tienda.Modelo.Juego;
+import Arregos.Tienda.Modelo.utilitario.Validacion;
+
+import javax.swing.*;
+import java.util.Scanner;
+
+public class MainTienda {
+    private static AppStore tienda  = new AppStore();
+    private static Scanner sc = new Scanner(System.in);
+    
+    public static void main(String[] args) {
+        int opc;
+        tienda.cargarDatos();
+        do {
+            menu();
+            opc = Integer.parseInt(sc.nextLine());
+            switch (opc) {
+                case 1: {
+                    ingresarJuego();
+                }
+                break;
+                case 2: {
+                    imprimirInformacion();
+                }
+                break;
+                case 3: {
+                    buscarJuego();
+                }
+                break;
+                case 4: {
+                    comprarJuego();
+                }
+                break;
+                case 5: {
+                    venderJuego();
+                }
+                break;
+                case 6: {
+                    juegoMasVendido();
+                }
+                break;
+                case 7: {
+                    System.out.println("Saliendo del sistema...");
+                }
+                break;
+                default: {
+                    System.out.println("Opcion Invalida");
+                }
+            }
+        } while (opc != 7);
+    }
+
+    public static void menu(){
+        System.out.println("**********AppStore Udla**********");
+        System.out.println("1. Ingresar Juego");
+        System.out.println("2. Mostrar juegos");
+        System.out.println("3. Buscar juego");
+        System.out.println("4. Comprar");
+        System.out.println("5. Vender");
+        System.out.println("6. Juego más vendido");
+        System.out.println("7. Salir");
+        System.out.print("Ingrese una opcion: ");
+    }
+
+    public static void ingresarJuego(){
+        System.out.println("*******Ingreso de datos********");
+        String nombre = Validacion.leerString("Ingrese el nombre del juego: ");
+        String categoria = Validacion.leerString("Ingrese la categoria: ");
+        System.out.print("Ingrese el tamanio: ");
+        int tamanio = Integer.parseInt(sc.nextLine());
+        System.out.print("Ingrese el precio: ");
+        double precio = Double.parseDouble(sc.nextLine());
+        System.out.print("Ingrese el stock inicial: ");
+        int licenciasDisponibles = Integer.parseInt(sc.nextLine());
+        
+        if (tienda.adicionarJuego(new Juego(nombre, categoria, tamanio, precio, licenciasDisponibles))){
+            JOptionPane.showMessageDialog(null, "El juego se ha agregado con exito");
+        } else {
+            JOptionPane.showMessageDialog(null, "No fue posible agregar el juego (Arreglo lleno o datos duplicados)");
+        }
+    }
+
+    public static void imprimirInformacion(){
+        Juego juegos[] = tienda.getJuegos();
+        if (tienda.getIndice() == -1) {
+            System.out.println("No existen juegos aun");
+        } else {
+            for (int i = 0; i <= tienda.getIndice(); i++){
+                System.out.println(juegos[i]);
+            }
+        }
+    }
+
+    public static void buscarJuego() {
+        System.out.println("*******Buscar Juego********");
+        String nombre = Validacion.leerString("Ingrese el nombre del juego a buscar: ");
+        Juego juegoEncontrado = tienda.buscar(nombre); // Asumiendo que AppStore tiene un método buscar(String nombre)
+        
+        if (juegoEncontrado != null) {
+            System.out.println("Juego encontrado:");
+            System.out.println(juegoEncontrado);
+        } else {
+            JOptionPane.showMessageDialog(null, "El juego '" + nombre + "' no fue encontrado.");
+        }
+    }
+
+    public static void comprarJuego() {
+        System.out.println("*******Comprar / Aumentar Stock********");
+        String nombre = Validacion.leerString("Ingrese el nombre del juego que desea comprar (stock): ");
+        System.out.print("Ingrese la cantidad de licencias a anadir: ");
+        int cantidad = Integer.parseInt(sc.nextLine());
+        
+        boolean exito = tienda.comprar(nombre, cantidad); // Asumiendo que AppStore tiene un método comprar(String nombre, int cantidad)
+        if (exito) {
+            JOptionPane.showMessageDialog(null, "Se han anadido " + cantidad + " licencias al juego " + nombre);
+        } else {
+            JOptionPane.showMessageDialog(null, "No fue posible realizar la operacion. Verifique el nombre del juego.");
+        }
+    }
+
+    public static void venderJuego(){
+        System.out.println("*******Vender Juego********");
+        String nombre = Validacion.leerString("Ingrese el nombre del juego a vender: ");
+        System.out.print("Ingrese la cantidad de licencias: ");
+        int cantidad = Integer.parseInt(sc.nextLine());
+        
+        double valorPago = tienda.vender(nombre, cantidad);
+        if (valorPago != 0){
+            JOptionPane.showMessageDialog(null, "Juego: " + nombre + "\nCantidad: " + cantidad +
+                    "\nValor a cancelar: " + valorPago);
+        } else {
+            JOptionPane.showMessageDialog(null, "No fue posible vender el juego " + nombre + " (Stock insuficiente o no existe)");
+        }
+    }
+
+    public static void juegoMasVendido() {
+        System.out.println("*******Juego Más Vendido********");
+        Juego topJuego = tienda.darJuegoMasVendido(); // Asumiendo que AppStore tiene un método similar para esto
+        
+        if (topJuego != null) {
+            System.out.println("El juego con mas ventas es:");
+            System.out.println(topJuego);
+        } else {
+            System.out.println("Aun no hay registros de ventas.");
+        }
+    }
+}
